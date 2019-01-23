@@ -1,6 +1,7 @@
 const express = require('express');
 const knex = require('knex');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const knexfile = require('./knexfile');
 
@@ -8,6 +9,39 @@ const server = express();
 const db = knex(knexfile.development);
 
 server.use(express.json());
+
+const generateToken = user => {
+
+  const payload = {
+
+    subject: user.id,
+    username: user.username
+
+  }
+
+  const secret = process.env.JWT_KEY || 'asjkdfoweyrsajdhfjksadhg';
+
+  const options = {
+
+    expiresIn: 60 * 5
+
+  }
+
+  return new Promise((res, rej) => {
+
+    jwt.sign(payload, secret, options, (err, token) => {
+
+      if (err)
+        rej(err);
+
+      else
+        res(token);
+
+    });
+
+  });
+
+}
 
 server.post('/api/register', async (req, res) => {
 
@@ -37,6 +71,48 @@ server.post('/api/register', async (req, res) => {
     res.status(500).json({message: 'internal error'});
 
   }
+
+});
+
+server.post('/api/login', async (req, res) => {
+
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+
+    res.status(400).json({message: 'invalid request'});
+    return;
+
+  }
+
+  try {
+
+    const user = await db.select().from('users').where({ username }).first();
+
+    if (user) {
+
+      const correct = await bcrypt.compare(password, user.password);
+
+      if (correct) {
+
+        const token = await generateToken(user);
+
+        res.status(200).json({message: 'authorized!', token});
+        return;
+
+      }
+
+    }
+
+  }
+
+  catch (err) {
+
+    res.status(500).json({message: 'internal error'});
+
+  }
+
+  res.status(401).json({message: 'Invalid credentials'});
 
 });
 
