@@ -75,11 +75,11 @@ const protected = (req, res, next) => {
 
 server.get('/api/users', protected, async (req, res) => {
 
-  console.log(req.token);
-
   try {
 
-    const users = await db.select('id', 'username', 'department').from('users');
+    const user = await db.select('department').from('users').where({ username: req.token.username}).first();
+
+    const users = await db.select('id', 'username', 'department').from('users').where({ department: user.department });
 
     res.status(200).json(users);
 
