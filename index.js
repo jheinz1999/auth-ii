@@ -43,6 +43,56 @@ const generateToken = user => {
 
 }
 
+const protected = (req, res, next) => {
+
+  const token = req.get('Authorization');
+
+  if (token) {
+
+    jwt.verify(token, process.env.JWT_KEY || 'asjkdfoweyrsajdhfjksadhg', (err, decoded) => {
+
+      if (err) {
+
+        res.status(401).json({message: 'Invalid token!'});
+
+      }
+
+      else {
+
+        req.token = decoded;
+        next();
+
+      }
+
+    });
+
+  }
+
+  else
+    res.status(400).json({message: 'no token provided!'});
+
+}
+
+server.get('/api/users', protected, async (req, res) => {
+
+  console.log(req.token);
+
+  try {
+
+    const users = await db.select('id', 'username', 'department').from('users');
+
+    res.status(200).json(users);
+
+  }
+
+  catch (err) {
+
+    res.status(500).json({message: 'internal error'});
+
+  }
+
+});
+
 server.post('/api/register', async (req, res) => {
 
   let { username, password, department } = req.body;
