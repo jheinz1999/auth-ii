@@ -2,6 +2,7 @@ const express = require('express');
 const knex = require('knex');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const cors = require('cors');
 
 const knexfile = require('./knexfile');
 
@@ -9,6 +10,7 @@ const server = express();
 const db = knex(knexfile.development);
 
 server.use(express.json());
+server.use(cors());
 
 const generateToken = user => {
 
@@ -112,13 +114,15 @@ server.post('/api/register', async (req, res) => {
 
     const user = await db.select('id', 'username', 'department').from('users').where({ id }).first();
 
-    res.status(201).json(user);
+    const token = await generateToken(user);
+
+    res.status(201).json({user, token});
 
   }
 
   catch (err) {
 
-    res.status(500).json({message: 'internal error'});
+    res.status(500).json({message: 'Username may already exist!'});
 
   }
 
