@@ -151,7 +151,7 @@ server.post('/api/login', async (req, res) => {
 
         const token = await generateToken(user);
 
-        res.status(200).json({message: 'authorized!', token});
+        res.status(200).json({message: 'authorized!', token, user});
         return;
 
       }
