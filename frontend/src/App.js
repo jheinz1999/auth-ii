@@ -3,6 +3,7 @@ import { Route, withRouter } from 'react-router-dom';
 
 import SignupPage from './components/SignupPage';
 import SigninPage from './components/SigninPage';
+import UsersPage from './components/UsersPage';
 
 class App extends Component {
   render() {
@@ -30,6 +31,12 @@ class App extends Component {
           exact
           path='/signin'
           render={props => <SigninPage {...props} />}
+        />
+
+        <Route
+          exact
+          path='/users'
+          render={props => <UsersPage {...props} />}
         />
 
       </div>
