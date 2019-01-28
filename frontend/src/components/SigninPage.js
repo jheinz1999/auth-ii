@@ -72,6 +72,10 @@ export default class SigninPage extends React.Component {
         {this.state.errorMsg && <p>{this.state.errorMsg}</p>}
 
         <button>Sign In</button>
+        <button onClick={e => {
+          e.preventDefault();
+          this.props.history.push('/signup');
+        }}>Sign up</button>
 
       </form>
 
